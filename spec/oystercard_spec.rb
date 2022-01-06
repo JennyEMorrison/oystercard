@@ -55,20 +55,32 @@ describe Oystercard do
     it 'can touch in' do
       expect(subject).to be_in_journey
     end
+    
+    describe '#touch_out' do
+      it 'can touch out' do
+        subject.touch_out(exit_station)
+        expect(subject).not_to be_in_journey
+        end
+        let(:journey){ {entry_station: entry_station, exit_station: exit_station} }
+        it "stores a journey" do
+          subject.touch_in(entry_station)
+          subject.touch_out(exit_station)
+          expect(subject.journey_history).to include journey
+        end
+      end
+      
+    
 
-    it 'can touch out' do
-      subject.touch_out(exit_station)
-      expect(subject).not_to be_in_journey
+      it 'will deduct the correct fare at end of journey' do      
+        expect { subject.touch_out(exit_station) }.to change{ subject.balance }.by(-Oystercard::MINIMUM_BALANCE)
     end
 
-    it 'will deduct the correct fare at end of journey' do      
-      expect { subject.touch_out(exit_station) }.to change{ subject.balance }.by(-Oystercard::MINIMUM_BALANCE)
+    it "has an empty list of journey by default" do
+      expect(subject.journey_history).to be_empty
     end
   end
   
   it 'will not touch in if below minimum amount' do
     expect{ subject.touch_in(entry_station) }.to raise_error 'unable to touch in, insufficient balance'
   end
-
- 
 end
